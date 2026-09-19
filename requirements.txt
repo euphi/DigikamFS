@@ -1,0 +1,7 @@
+pyfuse3>=3.3.0
+trio>=0.22
+Pillow>=10.0.0
+PyYAML>=6.0
+
+# Zusätzlich als Systempaket nötig (kein pip-Paket):
+#   Debian/Ubuntu: sudo apt install libimage-exiftool-perl

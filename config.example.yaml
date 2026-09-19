@@ -1,0 +1,39 @@
+# Pfad zur digikam-SQLite-Datenbank (nicht die Thumbnails-DB!).
+# Typischerweise unter ~/.local/share/digikam/digikam4.db oder direkt im
+# Sammlungs-Root, falls du digikam so konfiguriert hast.
+digikam_db: /home/user/.local/share/digikam/digikam4.db
+
+# Verzeichnis, in dem die verkleinerten JPEGs zwischengespeichert werden.
+# Braucht Schreibrechte für den Benutzer, unter dem digikamfs läuft.
+cache_dir: /var/cache/digikamfs
+
+# Sterne-Schwellwerte. "3Sterne" enthält alles mit rating >= 3,
+# "4Sterne" alles mit rating >= 4 (kein separater "5Sterne"-Ordner nötig,
+# 5er sind automatisch in beiden enthalten).
+star_levels: [3, 4]
+
+jpeg_quality: 85
+
+# Wie oft (in Sekunden) die digikam-DB neu eingelesen wird, um neue
+# Bewertungen/Fotos zu erfassen. 300 = alle 5 Minuten.
+refresh_interval_seconds: 300
+
+# Auflösungsprofile: Name -> maximale Kantenlänge in Pixel.
+# "null" (YAML für None) bedeutet Passthrough = Originaldatei, nicht verkleinert.
+profiles:
+  Original: null
+  QHD: 2560
+  Web: 1280
+
+# Wichtig für Freigabe per SMB/DLNA: ein FUSE-Mount ist per Kernel-Default nur
+# für den mountenden User sichtbar -- andere Prozesse (z.B. minidlna, smbd)
+# bekommen sonst "Permission denied", selbst wenn die Dateirechte passen
+# würden. allow_other hebt das auf. Falls der Mount NICHT als root läuft,
+# muss zusätzlich einmalig in /etc/fuse.conf die Zeile "user_allow_other"
+# (ohne #) aktiviert werden, siehe README.
+allow_other: true
+
+# Nur ändern, falls `digikamfs debug-db` andere Werte für "sichtbar"/"Bild"
+# in deiner DB zeigt (siehe README, Abschnitt "Vor dem ersten Einsatz").
+# status_visible_value: 1
+# category_image_value: 1
