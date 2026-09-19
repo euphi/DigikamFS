@@ -24,7 +24,14 @@ sudo apt install libfuse3-dev fuse3 pkg-config python3-venv libimage-exiftool-pe
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
+pip install -e .
 ```
+
+Der Editable-Install liefert das Kommando `digikamfs` und macht das Paket
+unabhängig vom Arbeitsverzeichnis importierbar -- worauf die systemd-Unit
+weiter unten aufbaut. Ohne ihn funktionieren die folgenden Befehle weiterhin,
+aber nur aus dem Projektverzeichnis heraus und in der Schreibweise
+`python3 -m digikamfs`.
 
 `exiftool` wird für alle Profile mit Verkleinerung benötigt und überträgt
 EXIF/IPTC/XMP/GPS von der Originaldatei auf die verkleinerte Version. Wird
@@ -204,20 +211,49 @@ werden, wenn Auflösungsprofile hinzugefügt oder entfernt werden.
 
 `/etc/systemd/system/digikamfs.service`:
 
+Eine fertige Vorlage dieser Unit liegt unter
+[contrib/digikamfs.service](contrib/digikamfs.service).
+
 ```ini
 [Unit]
-Description=DigikamFS
-After=network.target
+Description=DigikamFS (read-only FUSE view of digiKam albums)
+After=local-fs.target
+# Samba erst starten, wenn der Mount steht (schadet nicht, wenn smb.service aus ist).
+Before=smb.service
 
 [Service]
 Type=simple
-ExecStart=/pfad/zu/venv/bin/python3 -m digikamfs mount /srv/DigikamFS -c /pfad/zu/config.yaml
-ExecStop=/bin/fusermount3 -u /srv/DigikamFS
-Restart=on-failure
 User=benutzer
+Group=benutzer
+ExecStart=/pfad/zu/venv/bin/digikamfs mount /srv/DigikamFS -c /pfad/zu/config.yaml
+ExecStop=/usr/bin/fusermount3 -u /srv/DigikamFS
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=30
 
 [Install]
 WantedBy=multi-user.target
+```
+
+Zwei Punkte sind dabei wichtig:
+
+- `ExecStart` nutzt das Konsolenskript `digikamfs` aus dem venv, das
+  `pip install -e .` voraussetzt (siehe Installation). Die Modul-Schreibweise
+  `python3 -m digikamfs` findet das Paket nur über das aktuelle Verzeichnis,
+  und systemd startet Dienste in `/` -- sie braucht daher zusätzlich ein
+  `WorkingDirectory=/pfad/zum/projekt`.
+- Sandbox-Optionen wie `ProtectHome=`, `ProtectSystem=strict` oder
+  `PrivateMounts=` dürfen **nicht** ergänzt werden. Sie legen den Dienst in
+  eine eigene Mount-Namespace, wodurch der FUSE-Mount für smbd/minidlna
+  unsichtbar wird -- der im Troubleshooting beschriebene Fall, der sich
+  meist als "kein Verzeichnis gefunden" äußert.
+
+Aktivieren und kontrollieren:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now digikamfs
+journalctl -u digikamfs -f
 ```
 
 Für den nächtlichen Cache-Vorlauf zusätzlich einen Cron-/systemd-Timer auf

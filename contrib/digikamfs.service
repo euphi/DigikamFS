@@ -1,0 +1,40 @@
+# DigikamFS systemd unit -- see README.md, section "Example: systemd service".
+#
+# Copy to /etc/systemd/system/digikamfs.service and replace the placeholders:
+#   /path/to/venv        virtualenv the project was installed into
+#   /path/to/config.yaml configuration file
+#   /srv/DigikamFS       mountpoint (must exist and be owned by User= below)
+#   someuser             user owning the digiKam database and the cache directory
+#
+# Then: sudo systemctl daemon-reload && sudo systemctl enable --now digikamfs
+
+[Unit]
+Description=DigikamFS (read-only FUSE view of digiKam albums)
+Documentation=https://github.com/euphi/DigikamFS
+After=local-fs.target
+# Start Samba only once the mount is up (harmless if smb.service is disabled).
+Before=smb.service
+
+[Service]
+Type=simple
+User=someuser
+Group=someuser
+
+# Requires `pip install -e .` into the virtualenv, which provides this script.
+# Without it, use the module form instead -- it resolves the package through
+# the working directory, which systemd otherwise sets to /:
+#   WorkingDirectory=/path/to/project
+#   ExecStart=/path/to/venv/bin/python3 -m digikamfs mount /srv/DigikamFS -c /path/to/config.yaml
+ExecStart=/path/to/venv/bin/digikamfs mount /srv/DigikamFS -c /path/to/config.yaml
+ExecStop=/usr/bin/fusermount3 -u /srv/DigikamFS
+
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=30
+
+# Do NOT add ProtectHome=, ProtectSystem=strict or PrivateMounts=. Such
+# sandboxing options place the service in its own mount namespace, which makes
+# the FUSE mount invisible to smbd/minidlna.
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "digikamfs"
+description = "Read-only FUSE filesystem exposing digiKam albums and star ratings"
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+license-files = ["LICENSE"]
+dynamic = ["version"]
+classifiers = [
+    "Environment :: No Input/Output (Daemon)",
+    "Intended Audience :: End Users/Desktop",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Topic :: Multimedia :: Graphics",
+    "Topic :: System :: Filesystems",
+]
+dependencies = [
+    "pyfuse3>=3.3.0",
+    "trio>=0.22",
+    "Pillow>=10.0.0",
+    "PyYAML>=6.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/euphi/DigikamFS"
+
+[project.scripts]
+digikamfs = "digikamfs.cli:main"
+
+[tool.setuptools]
+packages = ["digikamfs"]
+
+[tool.setuptools.dynamic]
+version = {attr = "digikamfs.__version__"}
