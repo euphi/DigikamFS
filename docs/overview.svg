@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="400" viewBox="0 0 960 400" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#8b98a9"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="960" height="400" rx="16" fill="#f6f8fa"/>
+
+  <!-- digiKam -->
+  <text x="130" y="48" text-anchor="middle" font-size="15" font-weight="600" fill="#57606a">YOU RATE IN</text>
+  <rect x="30" y="64" width="200" height="236" rx="12" fill="#ffffff" stroke="#d0d7de"/>
+  <text x="130" y="100" text-anchor="middle" font-size="24" font-weight="700" fill="#1f2328">digiKam</text>
+  <g transform="translate(95,118)">
+    <ellipse cx="35" cy="10" rx="35" ry="10" fill="#dbe7f5" stroke="#4a78b5"/>
+    <path d="M0,10 v46 a35,10 0 0 0 70,0 v-46" fill="#dbe7f5" stroke="#4a78b5"/>
+    <path d="M0,33 a35,10 0 0 0 70,0" fill="none" stroke="#4a78b5"/>
+  </g>
+  <text x="130" y="198" text-anchor="middle" font-size="13" fill="#57606a" font-family="ui-monospace, Menlo, Consolas, monospace">digikam4.db</text>
+  <text x="130" y="236" text-anchor="middle" font-size="22" fill="#d4a017">★★★★★</text>
+  <text x="130" y="266" text-anchor="middle" font-size="13" fill="#57606a">albums · ratings</text>
+  <text x="130" y="284" text-anchor="middle" font-size="13" fill="#57606a">capture dates</text>
+
+  <line x1="236" y1="182" x2="316" y2="182" stroke="#8b98a9" stroke-width="2.5" marker-end="url(#arr)"/>
+  <text x="276" y="172" text-anchor="middle" font-size="11" fill="#8b98a9">read-only</text>
+
+  <!-- DigikamFS -->
+  <text x="480" y="48" text-anchor="middle" font-size="15" font-weight="600" fill="#57606a">DIGIKAMFS SHOWS</text>
+  <rect x="322" y="64" width="316" height="236" rx="12" fill="#1f2d3d"/>
+  <g font-family="ui-monospace, Menlo, Consolas, monospace" font-size="13.5" fill="#c9d4e0">
+    <text x="342" y="96"><tspan fill="#7fb3ff">/srv/DigikamFS/</tspan></text>
+    <text x="342" y="118">├─ Original/</text>
+    <text x="342" y="140">├─ QHD/  <tspan fill="#7d8a99"># 2560 px</tspan></text>
+    <text x="342" y="162">│  └─ 2026/</text>
+    <text x="342" y="184">│     └─ Summer-Holiday/</text>
+    <text x="342" y="206">│        ├─ <tspan fill="#f2c94c">3stars/</tspan></text>
+    <text x="342" y="228">│        └─ <tspan fill="#f2c94c">4stars/</tspan></text>
+    <text x="342" y="250">│           └─ IMG_0042.jpg</text>
+    <text x="342" y="272">└─ Web/  <tspan fill="#7d8a99"># 1280 px</tspan></text>
+  </g>
+
+  <line x1="644" y1="182" x2="724" y2="182" stroke="#8b98a9" stroke-width="2.5" marker-end="url(#arr)"/>
+
+  <!-- Consumers -->
+  <text x="830" y="48" text-anchor="middle" font-size="15" font-weight="600" fill="#57606a">EVERYONE ELSE GETS</text>
+  <g font-size="15" fill="#1f2328">
+    <rect x="730" y="64" width="200" height="68" rx="12" fill="#ffffff" stroke="#d0d7de"/>
+    <text x="830" y="93" text-anchor="middle" font-weight="600">Samba share</text>
+    <text x="830" y="115" text-anchor="middle" font-size="12.5" fill="#57606a">family laptops &amp; phones</text>
+    <rect x="730" y="148" width="200" height="68" rx="12" fill="#ffffff" stroke="#d0d7de"/>
+    <text x="830" y="177" text-anchor="middle" font-weight="600">DLNA / smart TV</text>
+    <text x="830" y="199" text-anchor="middle" font-size="12.5" fill="#57606a">via minidlna</text>
+    <rect x="730" y="232" width="200" height="68" rx="12" fill="#ffffff" stroke="#d0d7de"/>
+    <text x="830" y="261" text-anchor="middle" font-weight="600">rsync · Nextcloud</text>
+    <text x="830" y="283" text-anchor="middle" font-size="12.5" fill="#57606a">photo frame, web gallery</text>
+  </g>
+
+  <!-- Footer facts -->
+  <g font-size="14" fill="#1f2328" text-anchor="middle">
+    <text x="480" y="340">Only your best shots · downscaled on first open, then cached · EXIF/GPS/XMP kept</text>
+    <text x="480" y="366" fill="#57606a">No export step, no duplicate library — rate a photo in digiKam and it shows up.</text>
+  </g>
+</svg>

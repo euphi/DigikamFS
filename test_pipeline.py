@@ -6,10 +6,10 @@ from pathlib import Path
 
 from PIL import Image
 
+from digikamfs.cache import cache_path_for, check_exiftool_available, ensure_cached
 from digikamfs.config import Config
-from digikamfs.digikam_index import load_photos, debug_dump
-from digikamfs.tree import build_tree, Tree, DirNode, FileNode
-from digikamfs.cache import ensure_cached, cache_path_for, check_exiftool_available
+from digikamfs.digikam_index import debug_dump, load_photos
+from digikamfs.tree import DirNode, FileNode, Tree, build_tree
 
 check_exiftool_available()
 
@@ -105,6 +105,7 @@ assert len(photos) == 3, f"erwartet 3 Fotos (2-Sterne-Bild und Video raus), beko
 
 print("\n=== Aufnahmedatum vs. Datei-mtime ===")
 from datetime import datetime
+
 by_name = {p.filename: p for p in photos}
 
 img2 = by_name["IMG_0002.jpg"]
@@ -197,5 +198,11 @@ orig_node = tree.inode_to_node[tree.path_to_inode["Original/2026/2026-08-xx-Span
 result = ensure_cached(orig_node.source_path, cache_path_for(cfg.cache_dir, "Original", orig_node.source_path), orig_node.profile_max_dim, cfg.jpeg_quality)
 assert result == orig_node.source_path, "Original-Profil sollte direkt den Quellpfad liefern"
 print("Original-Profil Passthrough: OK")
+
+# Konfigurierbare Sterne-Ordnernamen (z.B. englisch)
+tree_en = Tree(build_tree(photos, cfg.profiles, cfg.star_levels, "{n}stars"))
+assert "QHD/2026/2026-08-xx-SpanienSofi/3stars/IMG_0001.jpg" in tree_en.path_to_inode
+assert "QHD/2026/2026-08-xx-SpanienSofi/3Sterne" not in tree_en.path_to_inode
+print("Konfigurierbare Sterne-Ordnernamen (star_dir_format): OK")
 
 print("\nALLE TESTS BESTANDEN")

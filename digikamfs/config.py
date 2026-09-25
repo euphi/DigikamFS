@@ -24,6 +24,7 @@ class Config:
     min_status: int
     image_category: int
     allow_other: bool
+    star_dir_format: str = "{n}Sterne"  # Name der Sterne-Ordner, {n} = Schwellwert
 
 
 def load_config(path: Path) -> Config:
@@ -74,6 +75,17 @@ def load_config(path: Path) -> Config:
     # "minidlna/Samba: Permission denied".
     allow_other = bool(raw.get("allow_other", True))
 
+    # Benennung der Sterne-Ordner, z.B. "{n}Sterne" -> "3Sterne" oder
+    # "{n}stars" -> "3stars". {n} muss vorkommen, sonst hätten alle
+    # Schwellwerte denselben Ordnernamen.
+    star_dir_format = str(raw.get("star_dir_format", "{n}Sterne"))
+    if "{n}" not in star_dir_format or "/" in star_dir_format:
+        raise ConfigError("'star_dir_format' muss '{n}' enthalten und darf kein '/' enthalten, z.B. '{n}stars'")
+    try:
+        star_dir_format.format(n=0)
+    except (KeyError, IndexError, ValueError) as exc:
+        raise ConfigError(f"'star_dir_format' ist kein gültiges Format ({exc}), z.B. '{{n}}stars'") from exc
+
     return Config(
         digikam_db=digikam_db,
         cache_dir=cache_dir,
@@ -84,4 +96,5 @@ def load_config(path: Path) -> Config:
         min_status=min_status,
         image_category=image_category,
         allow_other=allow_other,
+        star_dir_format=star_dir_format,
     )

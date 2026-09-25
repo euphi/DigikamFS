@@ -28,7 +28,12 @@ class FileNode:
 Node = Union[DirNode, FileNode]
 
 
-def build_tree(photos: List[Photo], profiles: Dict[str, Optional[int]], star_levels: List[int]) -> DirNode:
+def build_tree(
+    photos: List[Photo],
+    profiles: Dict[str, Optional[int]],
+    star_levels: List[int],
+    star_dir_format: str = "{n}Sterne",
+) -> DirNode:
     root = DirNode()
 
     by_album: Dict[str, List[Photo]] = {}
@@ -54,7 +59,7 @@ def build_tree(photos: List[Photo], profiles: Dict[str, Optional[int]], star_lev
                 if not matching:
                     continue
                 star_dir = DirNode()
-                cur.children[f"{level}Sterne"] = star_dir
+                cur.children[star_dir_format.format(n=level)] = star_dir
                 for p in matching:
                     star_dir.children[p.filename] = FileNode(
                         source_path=p.abs_path,
