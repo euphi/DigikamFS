@@ -6,7 +6,7 @@ import sys
 import time
 from pathlib import Path
 
-from .cache import cache_path_for, check_exiftool_available, ensure_cached, MetadataCopyError
+from .cache import MetadataCopyError, cache_path_for, check_exiftool_available, ensure_cached
 from .config import Config, ConfigError, load_config
 from .digikam_index import debug_dump, load_photos
 from .tree import FileNode, Tree, build_tree
@@ -22,7 +22,7 @@ def _check_prereqs(cfg: Config) -> None:
 def _build_tree(cfg: Config) -> Tree:
     min_rating = min(cfg.star_levels)
     photos = load_photos(cfg.digikam_db, min_rating, cfg.min_status, cfg.image_category)
-    root = build_tree(photos, cfg.profiles, cfg.star_levels)
+    root = build_tree(photos, cfg.profiles, cfg.star_levels, cfg.star_dir_format)
     return Tree(root)
 
 

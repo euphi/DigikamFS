@@ -12,6 +12,11 @@ cache_dir: /var/cache/digikamfs
 # 5er sind automatisch in beiden enthalten).
 star_levels: [3, 4]
 
+# Name der Sterne-Ordner; {n} wird durch den Schwellwert ersetzt.
+# Standard "{n}Sterne" -> "3Sterne". Für englische Namen z.B. "{n}stars"
+# oder "{n}+ stars" (-> "3+ stars").
+# star_dir_format: "{n}Sterne"
+
 jpeg_quality: 85
 
 # Wie oft (in Sekunden) die digikam-DB neu eingelesen wird, um neue

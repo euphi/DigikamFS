@@ -4,18 +4,29 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "digikamfs"
-description = "Read-only FUSE filesystem exposing digiKam albums and star ratings"
+description = "Read-only FUSE filesystem that turns your digiKam star ratings into shareable, auto-downscaled photo folders"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = "MIT"
 license-files = ["LICENSE"]
 dynamic = ["version"]
+authors = [{ name = "Ian" }]
+keywords = [
+    "digikam", "fuse", "filesystem", "photos", "photo-management",
+    "samba", "dlna", "self-hosted", "thumbnails", "exif",
+]
 classifiers = [
+    "Development Status :: 4 - Beta",
     "Environment :: No Input/Output (Daemon)",
     "Intended Audience :: End Users/Desktop",
+    "Intended Audience :: System Administrators",
+    "Natural Language :: English",
+    "Natural Language :: German",
     "Operating System :: POSIX :: Linux",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
     "Topic :: Multimedia :: Graphics",
+    "Topic :: Multimedia :: Graphics :: Viewers",
     "Topic :: System :: Filesystems",
 ]
 dependencies = [
@@ -25,14 +36,32 @@ dependencies = [
     "PyYAML>=6.0",
 ]
 
+[project.optional-dependencies]
+dev = ["ruff>=0.5"]
+
 [project.urls]
 Homepage = "https://github.com/euphi/DigikamFS"
+Documentation = "https://github.com/euphi/DigikamFS#readme"
+Issues = "https://github.com/euphi/DigikamFS/issues"
+Changelog = "https://github.com/euphi/DigikamFS/blob/main/CHANGELOG.md"
 
 [project.scripts]
 digikamfs = "digikamfs.cli:main"
+digikamfs-smb-shares = "digikamfs.generate_smb_shares:main"
 
 [tool.setuptools]
 packages = ["digikamfs"]
 
 [tool.setuptools.dynamic]
 version = {attr = "digikamfs.__version__"}
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "B", "I"]
+
+[tool.ruff.lint.per-file-ignores]
+# Skript-artiger End-to-End-Test: Imports mitten im Ablauf, lange Assert-Meldungen
+"test_pipeline.py" = ["E402", "E501"]

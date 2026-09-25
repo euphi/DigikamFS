@@ -1,0 +1,31 @@
+name: Bug report
+description: Something does not work as expected
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: debugdb
+    attributes:
+      label: Output of `digikamfs debug-db -c config.yaml`
+      description: Shows which status/category/rating values your digiKam database uses.
+      render: text
+  - type: textarea
+    id: log
+    attributes:
+      label: Log output
+      description: Run with `digikamfs -v mount ...` or `journalctl -u digikamfs`.
+      render: text
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      description: DigikamFS, digiKam, distribution, Python
+      placeholder: "DigikamFS 0.1.0, digiKam 8.4, Debian 12, Python 3.11"
+    validations:
+      required: true

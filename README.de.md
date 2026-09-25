@@ -1,21 +1,82 @@
-# DigikamFS
+<h1 align="center">DigikamFS</h1>
 
-Virtuelles Nur-Lese-Dateisystem, das Alben und Sterne-Bewertungen direkt aus
-der digiKam-SQLite-Datenbank liest und als Baum
+<p align="center">
+  <b>Deine digiKam-Sternebewertungen als live aktualisiertes, freigebbares Foto-Dateisystem.</b><br>
+  In digiKam bewerten &ndash; Fernseher, Familien-Laptop und Bilderrahmen sehen nur die besten Fotos, in passender Größe, immer aktuell.
+</p>
 
-```
-<ExportRoot>/<Auflösungsprofil>/<Jahr>/<Album>/<N>Sterne/<Dateiname>
-```
+<p align="center">
+  <a href="https://github.com/euphi/DigikamFS/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/euphi/DigikamFS/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue.svg"></a>
+  <img alt="Python 3.10+" src="https://img.shields.io/badge/python-3.10%2B-blue.svg">
+  <img alt="Linux / FUSE 3" src="https://img.shields.io/badge/platform-Linux%20%C2%B7%20FUSE%203-lightgrey.svg">
+</p>
 
-per FUSE bereitstellt. Fotos werden beim ersten Zugriff auf die konfigurierte
-Auflösung herunterskaliert und danach als Datei gecacht. Der Mount kann
-anschließend ganz normal per SMB/DLNA freigegeben oder als Kopierquelle
-(rsync, Nextcloud-Client, ...) benutzt werden.
-
-Videos und alles außer Standard-JPEGs (z.B. RAW) werden aktuell ignoriert.
+<p align="center">
+  <img src="docs/overview.svg" alt="digiKam-Datenbank → DigikamFS → Samba, DLNA-Fernseher, rsync/Nextcloud" width="880">
+</p>
 
 *The English version of this documentation is available in
 [README.md](README.md).*
+
+## Warum?
+
+digiKam verwaltet große Fotosammlungen hervorragend &ndash; aber sobald die
+*guten* Fotos woanders gezeigt werden sollen, heißt es wieder exportieren:
+nach Bewertung auswählen, verkleinern, kopieren, und das bei jeder neuen
+Bewertung von vorn. Die Exporte veralten, belegen Platz, und keiner weiß mehr,
+welcher Ordner aktuell ist.
+
+DigikamFS spart den Export-Schritt. Es liest Alben und Sterne-Bewertungen
+direkt aus der digiKam-SQLite-Datenbank und stellt sie als Nur-Lese-
+Dateisystem per FUSE bereit:
+
+```
+<Mountpoint>/<Auflösungsprofil>/<Jahr>/<Album>/<N>Sterne/<Dateiname>
+```
+
+Samba, minidlna, rsync oder den Nextcloud-Client darauf zeigen lassen, und
+jedes Gerät sieht eine aufgeräumte, nach Bewertung gefilterte und passend
+verkleinerte Sicht auf die Sammlung. Ein Foto in digiKam mit vier Sternen
+bewerten &ndash; wenige Minuten später liegt es im Ordner `4Sterne` auf dem
+Wohnzimmer-Fernseher.
+
+## Features
+
+- **Freigeben ohne Export** &ndash; ein virtueller Ordner pro Bewertungsstufe
+  (`3Sterne` = mindestens 3 Sterne, `4Sterne` = mindestens 4, ...), nach Jahr
+  und Album gegliedert wie in digiKam.
+- **Mehrere Auflösungen parallel** &ndash; z.B. `Original/`, `QHD/`
+  (2560&nbsp;px) und `Web/` (1280&nbsp;px) als eigene Bäume.
+- **Verkleinerung erst beim Öffnen, mit echtem Cache** &ndash; Browsen
+  erzeugt nie etwas, `ls -l` bleibt auch bei riesigen Sammlungen sofort da.
+- **Metadaten bleiben erhalten** &ndash; EXIF (inkl. Orientierung), GPS,
+  IPTC und XMP werden per `exiftool` übertragen.
+- **Aufnahmedatum als Dateidatum** &ndash; Fernseher und Galerien sortieren
+  chronologisch.
+- **Immer aktuell** &ndash; der Index wird im Hintergrund neu eingelesen
+  (Standard: alle 5 Minuten), ohne laufende Zugriffe zu stören.
+- **SMB/DLNA-freundlich** &ndash; stabile Inode-Nummern, atomare
+  Cache-Dateien, Prefetch des nächsten Fotos.
+- **Sicher** &ndash; digiKam-DB und Originale werden ausschließlich gelesen.
+- **Alles dabei** &ndash; systemd-Unit, Samba-Freigabe-Generator und
+  Cache-Vorwärmen.
+
+## Schnellstart
+
+```bash
+sudo apt install libfuse3-dev fuse3 pkg-config python3-venv libimage-exiftool-perl
+git clone https://github.com/euphi/DigikamFS && cd DigikamFS
+python3 -m venv venv && . venv/bin/activate
+pip install -e .
+
+cp config.example.yaml config.yaml
+$EDITOR config.yaml                 # digikam_db, cache_dir, profiles anpassen
+digikamfs debug-db -c config.yaml   # DB-Annahmen prüfen (siehe unten)
+
+mkdir -p /srv/DigikamFS
+digikamfs mount /srv/DigikamFS -c config.yaml
+```
 
 ## Installation
 
@@ -64,6 +125,9 @@ Siehe `config.example.yaml`, kopieren nach `config.yaml` und anpassen:
 - `profiles`: ein Ordner pro Auflösung auf oberster Ebene; `null` = Original
   ohne Verkleinerung (Passthrough, kein zusätzlicher Speicherbedarf)
 - `star_levels`: welche `NSterne`-Ordner erzeugt werden (Standard `[3, 4]`)
+- `star_dir_format`: Name der Sterne-Ordner, `{n}` wird durch den
+  Schwellwert ersetzt. Standard `"{n}Sterne"` ergibt `3Sterne`; z.B.
+  `"{n}stars"` für englische Namen.
 
 ## Benutzung
 
@@ -197,7 +261,7 @@ Eine Freigabe pro Auflösungsprofil lässt sich auch automatisch aus den
 Top-Level-Verzeichnissen des Mountpoints erzeugen:
 
 ```bash
-sudo ./digikamfs/generate_smb_shares.py \
+sudo /pfad/zu/venv/bin/digikamfs-smb-shares \
     --mount-point /srv/DigikamFS \
     --smb-user digikamfs \
     --smb-group digikamfs
@@ -271,7 +335,19 @@ python3 test_pipeline.py
 
 Wurde bereits gegen einen echten FUSE-Mount verifiziert (readdir, getattr,
 open/read, `cp`) – das Projekt ist also funktionsfähig, nicht nur
-theoretisch korrekt.
+theoretisch korrekt. Die CI führt den Test bei jedem Push aus, zusammen mit
+`ruff check .` und einer Paketierungsprüfung.
+
+## Roadmap / Ideen
+
+Beiträge und Rückmeldungen sind sehr willkommen, z.B.:
+
+- HEIC/HEIF- und RAW-Unterstützung (über eingebettete Vorschaubilder)
+- Filtern nach digiKam-Tags, Farb- oder Pick-Labels zusätzlich zu Sternen
+- Videos als Passthrough-Dateien
+- Paketierung für PyPI / Distributionen
+
+Siehe [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Lizenz
 
